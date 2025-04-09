@@ -1,3 +1,5 @@
+// main.js
+
 const STORAGE_KEY = 'BOOKSHELF_APPS';
 let books = [];
 
@@ -66,6 +68,7 @@ function createBookElement(book) {
   const bookItem = document.createElement('div');
   bookItem.setAttribute('data-bookid', book.id);
   bookItem.setAttribute('data-testid', 'bookItem');
+  bookItem.classList.add('book-item');
 
   const title = document.createElement('h3');
   title.innerText = book.title;
@@ -80,6 +83,7 @@ function createBookElement(book) {
   year.setAttribute('data-testid', 'bookItemYear');
 
   const buttonContainer = document.createElement('div');
+  buttonContainer.classList.add('button-container');
 
   const toggleButton = document.createElement('button');
   toggleButton.innerText = book.isComplete ? 'Belum selesai dibaca' : 'Selesai dibaca';
@@ -130,26 +134,19 @@ function deleteBook(bookId) {
 function editBook(bookId) {
   const book = books.find((b) => b.id === bookId);
   if (book) {
-    const newTitle = prompt('Edit Judul Buku:', book.title);
-    const newAuthor = prompt('Edit Penulis Buku:', book.author);
-    const newYear = prompt('Edit Tahun Buku:', book.year);
+    const newTitle = prompt('Masukkan judul baru:', book.title);
+    const newAuthor = prompt('Masukkan penulis baru:', book.author);
+    const newYear = prompt('Masukkan tahun baru:', book.year);
 
-    if (newTitle && newAuthor && newYear) {
-      book.title = newTitle;
-      book.author = newAuthor;
-      book.year = parseInt(newYear);
+    if (newTitle !== null && newAuthor !== null && newYear !== null) {
+      book.title = newTitle.trim() !== '' ? newTitle : book.title;
+      book.author = newAuthor.trim() !== '' ? newAuthor : book.author;
+      book.year = newYear.trim() !== '' ? newYear : book.year;
+
       saveData();
       renderBooks();
     }
   }
-}
-
-function searchBook() {
-  const searchInput = document.getElementById('searchBookTitle').value.toLowerCase();
-  const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchInput)
-  );
-  renderBooks(filteredBooks);
 }
 
 function saveData() {
@@ -163,18 +160,25 @@ function loadDataFromStorage() {
   const serializedData = localStorage.getItem(STORAGE_KEY);
   if (serializedData) {
     const data = JSON.parse(serializedData);
-
-    for (const book of data) {
-      books.push(book);
+    if (Array.isArray(data)) {
+      books = data;
     }
   }
   renderBooks();
 }
 
 function isStorageExist() {
-  if (typeof Storage === undefined) {
-    alert('Browser kamu tidak mendukung localStorage');
+  if (typeof(Storage) === undefined) {
+    alert('Browser kamu tidak mendukung Local Storage');
     return false;
   }
   return true;
+}
+
+function searchBook() {
+  const searchTitle = document.getElementById('searchBookTitle').value.toLowerCase();
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchTitle)
+  );
+  renderBooks(filteredBooks);
 }
